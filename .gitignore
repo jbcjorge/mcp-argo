@@ -1,0 +1,4 @@
+mcp-argo
+mcp-argocd
+*.exe
+dist/

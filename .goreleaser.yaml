@@ -1,0 +1,49 @@
+version: 2
+
+project_name: mcp-argo
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: mcp-argo
+    main: .
+    binary: mcp-argo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.defaultLogLevel=info
+
+archives:
+  - id: default
+    format: binary
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  github:
+    owner: jbcjorge
+    name: mcp-argo
+  draft: false
+  prerelease: auto
+  name_template: "{{ .Tag }}"
