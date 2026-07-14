@@ -15,7 +15,7 @@ Single binary, no runtime dependencies, ~18 MB RSS at runtime.
 
 ## Installation
 
-### From source
+### From source (recommended)
 
 ```bash
 go install github.com/jbcjorge/mcp-argo@latest
@@ -28,6 +28,20 @@ git clone https://github.com/jbcjorge/mcp-argo.git
 cd mcp-argo
 make install  # builds, codesigns (macOS), and copies to ~/.local/bin/mcp-argo
 ```
+
+### Pre-built binaries
+
+Download from [GitHub Releases](https://github.com/jbcjorge/mcp-argo/releases).
+
+On macOS, downloaded binaries are quarantined by Gatekeeper. Remove the quarantine attribute before running:
+
+```bash
+xattr -d com.apple.quarantine mcp-argo_darwin_arm64
+chmod +x mcp-argo_darwin_arm64
+mv mcp-argo_darwin_arm64 ~/.local/bin/mcp-argo
+```
+
+> This is standard for Go CLI tools distributed via GitHub releases. Building from source (`go install`) avoids this entirely.
 
 ## Usage
 
