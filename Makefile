@@ -21,6 +21,7 @@ tools:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+	go install github.com/uudashr/gocognit/cmd/gocognit@latest
 	go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest
 	go install github.com/securego/gosec/v2/cmd/gosec@latest
 	go install gotest.tools/gotestsum@latest
@@ -74,12 +75,19 @@ gitleaks:
 	@which gitleaks >/dev/null 2>&1 || (echo "gitleaks not installed, skipping" && exit 0)
 	gitleaks detect --no-git -v
 
-## complexity: Check cyclomatic complexity (threshold: 15)
+## complexity: Check cyclomatic and cognitive complexity (threshold: 15)
 complexity:
 	@which gocyclo >/dev/null 2>&1 || go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+	@which gocognit >/dev/null 2>&1 || go install github.com/uudashr/gocognit/cmd/gocognit@latest
 	@output=$$(gocyclo -over 15 .); \
 	if [ -n "$$output" ]; then \
-		echo "Functions with cyclomatic complexity over 15:"; \
+		echo "Cyclomatic complexity over 15:"; \
+		echo "$$output"; \
+		exit 1; \
+	fi
+	@output=$$(gocognit -over 15 .); \
+	if [ -n "$$output" ]; then \
+		echo "Cognitive complexity over 15:"; \
 		echo "$$output"; \
 		exit 1; \
 	fi

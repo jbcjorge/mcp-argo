@@ -64,7 +64,7 @@ func HandleGetApplication(ctx context.Context, request mcp.CallToolRequest) (*mc
 		query.Set("appNamespace", appNamespace)
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName)
+	path := apiApplicationsPath + url.PathEscape(applicationName)
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
@@ -121,7 +121,7 @@ func HandleUpdateApplication(ctx context.Context, request mcp.CallToolRequest) (
 		return ErrResult(fmt.Errorf("failed to marshal application: %w", err))
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName)
+	path := apiApplicationsPath + url.PathEscape(applicationName)
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "PUT", path, nil, strings.NewReader(string(body)))
 	if err != nil {
 		return ErrResult(err)
@@ -157,7 +157,7 @@ func HandleDeleteApplication(ctx context.Context, request mcp.CallToolRequest) (
 		query.Set("propagationPolicy", propagationPolicy)
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName)
+	path := apiApplicationsPath + url.PathEscape(applicationName)
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "DELETE", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
@@ -210,7 +210,7 @@ func HandleSyncApplication(ctx context.Context, request mcp.CallToolRequest) (*m
 		return ErrResult(fmt.Errorf("failed to marshal sync body: %w", err))
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/sync"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/sync"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "POST", path, query, strings.NewReader(string(body)))
 	if err != nil {
 		return ErrResult(err)
@@ -250,7 +250,7 @@ func HandleRollbackApplication(ctx context.Context, request mcp.CallToolRequest)
 		return ErrResult(fmt.Errorf("failed to marshal rollback body: %w", err))
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/rollback"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/rollback"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "POST", path, query, strings.NewReader(string(body)))
 	if err != nil {
 		return ErrResult(err)

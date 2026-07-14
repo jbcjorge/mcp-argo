@@ -25,7 +25,7 @@ func HandleGetApplicationResourceTree(ctx context.Context, request mcp.CallToolR
 		query.Set("appNamespace", appNamespace)
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/resource-tree"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/resource-tree"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
@@ -54,7 +54,7 @@ func HandleGetApplicationManagedResources(ctx context.Context, request mcp.CallT
 		}
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/managed-resources"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/managed-resources"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
@@ -125,7 +125,7 @@ func HandleGetResourceActions(ctx context.Context, request mcp.CallToolRequest) 
 	query.Set("appNamespace", appNamespace)
 	BuildResourceRefQuery(resourceRef, query)
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/resource/actions"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/resource/actions"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
@@ -169,7 +169,7 @@ func HandleGetResourceEvents(ctx context.Context, request mcp.CallToolRequest) (
 	query.Set("resourceUID", resourceUID)
 	query.Set("resourceName", resourceName)
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/events"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/events"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
@@ -213,7 +213,7 @@ func HandleRunResourceAction(ctx context.Context, request mcp.CallToolRequest) (
 		return ErrResult(fmt.Errorf("failed to marshal action: %w", err))
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/resource/actions"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/resource/actions"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "POST", path, query, strings.NewReader(string(body)))
 	if err != nil {
 		return ErrResult(err)

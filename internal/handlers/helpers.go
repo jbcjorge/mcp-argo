@@ -130,38 +130,41 @@ func BuildResourceRefQuery(resourceRef map[string]interface{}, query url.Values)
 	}
 }
 
+// extractSubMap safely extracts a nested map from a parent map by key.
+func extractSubMap(m map[string]interface{}, key string) map[string]interface{} {
+	if v, ok := m[key]; ok {
+		if vm, ok := v.(map[string]interface{}); ok {
+			return vm
+		}
+	}
+	return nil
+}
+
+// copyFields copies the specified keys from src into a new map.
+func copyFields(src map[string]interface{}, keys []string) map[string]interface{} {
+	out := map[string]interface{}{}
+	for _, key := range keys {
+		if v, exists := src[key]; exists {
+			out[key] = v
+		}
+	}
+	return out
+}
+
 // StripApplicationItem extracts only lightweight fields from a single application item.
 func StripApplicationItem(app map[string]interface{}) map[string]interface{} {
 	light := map[string]interface{}{}
 
-	if meta, ok := app["metadata"].(map[string]interface{}); ok {
-		lightMeta := map[string]interface{}{}
-		for _, key := range []string{"name", "namespace", "labels", "creationTimestamp"} {
-			if v, exists := meta[key]; exists {
-				lightMeta[key] = v
-			}
-		}
-		light["metadata"] = lightMeta
+	if meta := extractSubMap(app, "metadata"); meta != nil {
+		light["metadata"] = copyFields(meta, []string{"name", "namespace", "labels", "creationTimestamp"})
 	}
 
-	if spec, ok := app["spec"].(map[string]interface{}); ok {
-		lightSpec := map[string]interface{}{}
-		for _, key := range []string{"project", "source", "destination"} {
-			if v, exists := spec[key]; exists {
-				lightSpec[key] = v
-			}
-		}
-		light["spec"] = lightSpec
+	if spec := extractSubMap(app, "spec"); spec != nil {
+		light["spec"] = copyFields(spec, []string{"project", "source", "destination"})
 	}
 
-	if status, ok := app["status"].(map[string]interface{}); ok {
-		lightStatus := map[string]interface{}{}
-		for _, key := range []string{"sync", "health", "summary"} {
-			if v, exists := status[key]; exists {
-				lightStatus[key] = v
-			}
-		}
-		light["status"] = lightStatus
+	if status := extractSubMap(app, "status"); status != nil {
+		light["status"] = copyFields(status, []string{"sync", "health", "summary"})
 	}
 
 	return light
@@ -199,7 +202,7 @@ func FetchResourceRefs(ctx context.Context, argocdBaseUrl, applicationName, appN
 	query := url.Values{}
 	query.Set("appNamespace", appNamespace)
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/resource-tree"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/resource-tree"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch resource tree: %w", err)
@@ -234,7 +237,7 @@ func FetchResourceManifest(ctx context.Context, argocdBaseUrl, applicationName, 
 		query.Set("version", ref.Version)
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/resource"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/resource"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return map[string]interface{}{

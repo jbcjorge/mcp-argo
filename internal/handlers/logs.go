@@ -36,7 +36,7 @@ func HandleGetApplicationWorkloadLogs(ctx context.Context, request mcp.CallToolR
 	query.Set("tailLines", "100")
 	BuildResourceRefQuery(resourceRef, query)
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/logs"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/logs"
 	results, err := DoStreamWithAuth(ctx, argocdBaseUrl, path, query)
 	if err != nil {
 		return ErrResult(err)

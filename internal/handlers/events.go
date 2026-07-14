@@ -24,7 +24,7 @@ func HandleGetApplicationEvents(ctx context.Context, request mcp.CallToolRequest
 		query.Set("appNamespace", appNamespace)
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/events"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/events"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
@@ -52,7 +52,7 @@ func HandleGetApplicationSyncWindows(ctx context.Context, request mcp.CallToolRe
 		query.Set("appNamespace", appNamespace)
 	}
 
-	path := "/api/v1/applications/" + url.PathEscape(applicationName) + "/syncwindows"
+	path := apiApplicationsPath + url.PathEscape(applicationName) + "/syncwindows"
 	data, err := DoWithAuth(ctx, argocdBaseUrl, "GET", path, query, nil)
 	if err != nil {
 		return ErrResult(err)
