@@ -3,12 +3,12 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/url"
 	"strings"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/client"
 	"github.com/mark3labs/mcp-go/mcp"
 )

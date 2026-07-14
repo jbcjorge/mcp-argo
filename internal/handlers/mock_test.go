@@ -3,12 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"net/url"
 	"testing"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/client"
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -143,7 +142,7 @@ func TestMock_ClientError(t *testing.T) {
 		Resolver = origResolver
 	})
 
-	mc := &mockAPIClient{doRequestErr: fmt.Errorf("%w (HTTP 500): internal error", client.ErrAPIError)}
+	mc := &mockAPIClient{doRequestErr: client.ErrAPIError.Parse(errors.WithParsedMessage(500, "internal error"))}
 	mr := &mockTokenResolver{baseURL: "https://argocd.test", token: "mock-token"}
 
 	Client = mc
@@ -231,7 +230,7 @@ type mockAPIClientWith401 struct {
 func (m *mockAPIClientWith401) DoRequest(ctx context.Context, method, baseURL, path, token string, query url.Values, body io.Reader) ([]byte, error) {
 	m.callCount++
 	if m.callCount == 1 {
-		return nil, fmt.Errorf("%w (HTTP 401): invalid session", client.ErrAPIError)
+		return nil, client.ErrAPIError.Parse(errors.WithParsedMessage(401, "invalid session"))
 	}
 	return m.successResponse, nil
 }
@@ -239,7 +238,7 @@ func (m *mockAPIClientWith401) DoRequest(ctx context.Context, method, baseURL, p
 func (m *mockAPIClientWith401) DoStreamingRequest(ctx context.Context, baseURL, path, token string, query url.Values) ([]map[string]interface{}, error) {
 	m.callCount++
 	if m.callCount == 1 {
-		return nil, fmt.Errorf("%w (HTTP 401): invalid session", client.ErrAPIError)
+		return nil, client.ErrAPIError.Parse(errors.WithParsedMessage(401, "invalid session"))
 	}
 	return []map[string]interface{}{{"content": "log"}}, nil
 }
@@ -330,7 +329,7 @@ func TestDoWithAuth_NoRetryOnNon401(t *testing.T) {
 		Resolver = origResolver
 	})
 
-	mc := &mockAPIClient{doRequestErr: fmt.Errorf("%w (HTTP 500): internal error", client.ErrAPIError)}
+	mc := &mockAPIClient{doRequestErr: client.ErrAPIError.Parse(errors.WithParsedMessage(500, "internal error"))}
 	mr := &mockTokenResolver{baseURL: "https://argocd.test", token: "token"}
 
 	Client = mc

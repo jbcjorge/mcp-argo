@@ -2,13 +2,13 @@ package client
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/config"
 )
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/client"
 	"github.com/jbcjorge/mcp-argo/internal/config"
 	"github.com/jbcjorge/mcp-argo/internal/handlers"

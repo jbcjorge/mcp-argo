@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -15,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/config"
 )
 
@@ -31,10 +31,10 @@ const (
 var (
 	ErrNoBaseURL     = errors.New("no ArgoCD base URL configured; set ARGOCD_BASE_URL or pass argocdBaseUrl")
 	ErrNoToken       = errors.New("no API token configured; set ARGOCD_API_TOKEN")
-	ErrTokenNotFound = errors.New("no token found for ArgoCD instance; add it to the token registry")
-	ErrRequestFailed = errors.New("request failed")
-	ErrParseResponse = errors.New("failed to parse response")
-	ErrAPIError      = errors.New("ArgoCD API error")
+	ErrTokenNotFound = errors.New("no token found for ArgoCD instance %s; add it to the token registry")
+	ErrRequestFailed = errors.New("request failed: %s")
+	ErrParseResponse = errors.New("failed to parse response: %s")
+	ErrAPIError      = errors.New("ArgoCD API error (HTTP %d): %s")
 )
 
 // HTTPClient implements APIClient using net/http.
@@ -76,7 +76,7 @@ func (c *HTTPClient) DoRequest(ctx context.Context, method, baseURL, path, token
 	slog.Debug("argocd api request", "method", method, "url", u)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrRequestFailed, err)
+		return nil, ErrRequestFailed.Parse(errors.WithParsedMessage(err.Error()), errors.WithError(err))
 	}
 	defer resp.Body.Close()
 
@@ -86,7 +86,7 @@ func (c *HTTPClient) DoRequest(ctx context.Context, method, baseURL, path, token
 	}
 
 	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("%w (HTTP %d): %s", ErrAPIError, resp.StatusCode, string(data))
+		return nil, ErrAPIError.Parse(errors.WithParsedMessage(resp.StatusCode, string(data)))
 	}
 
 	return data, nil
@@ -107,13 +107,13 @@ func (c *HTTPClient) DoStreamingRequest(ctx context.Context, baseURL, path, toke
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrRequestFailed, err)
+		return nil, ErrRequestFailed.Parse(errors.WithParsedMessage(err.Error()), errors.WithError(err))
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
 		data, _ := io.ReadAll(io.LimitReader(resp.Body, MaxResponseSize))
-		return nil, fmt.Errorf("%w (HTTP %d): %s", ErrAPIError, resp.StatusCode, string(data))
+		return nil, ErrAPIError.Parse(errors.WithParsedMessage(resp.StatusCode, string(data)))
 	}
 
 	var results []map[string]interface{}
@@ -197,7 +197,7 @@ func (r *RegistryTokenResolver) Resolve(argocdBaseUrl string) (string, string, e
 		token, err := r.execTokenCommand(baseURL)
 		if err != nil {
 			slog.Warn("token command failed", "url", baseURL, "err", err)
-			return "", "", fmt.Errorf("%w: %s", ErrTokenNotFound, baseURL)
+			return "", "", ErrTokenNotFound.Parse(errors.WithParsedMessage(baseURL))
 		}
 		if token != "" {
 			r.cache[baseURL] = token
@@ -206,7 +206,7 @@ func (r *RegistryTokenResolver) Resolve(argocdBaseUrl string) (string, string, e
 		}
 	}
 
-	return "", "", fmt.Errorf("%w: %s", ErrTokenNotFound, baseURL)
+	return "", "", ErrTokenNotFound.Parse(errors.WithParsedMessage(baseURL))
 }
 
 // Invalidate removes a cached token for the given base URL.
