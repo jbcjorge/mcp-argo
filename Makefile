@@ -1,4 +1,4 @@
-.PHONY: build install clean test lint vet vuln check fmt coverage release complexity tools shadow gosec gitleaks
+.PHONY: build install clean test lint vet vuln check fmt coverage release cyclomatic cognitive tools shadow gosec gitleaks
 
 BINARY    = mcp-argo
 MODULE    = github.com/jbcjorge/mcp-argo
@@ -75,23 +75,26 @@ gitleaks:
 	@which gitleaks >/dev/null 2>&1 || (echo "gitleaks not installed, skipping" && exit 0)
 	gitleaks detect --no-git -v
 
-## complexity: Check cyclomatic and cognitive complexity (threshold: 15)
-complexity:
+## cyclomatic: Check cyclomatic complexity (threshold: 15)
+cyclomatic:
 	@which gocyclo >/dev/null 2>&1 || go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-	@which gocognit >/dev/null 2>&1 || go install github.com/uudashr/gocognit/cmd/gocognit@latest
 	@output=$$(gocyclo -over 15 .); \
 	if [ -n "$$output" ]; then \
 		echo "Cyclomatic complexity over 15:"; \
 		echo "$$output"; \
 		exit 1; \
 	fi
+	@gocyclo -avg . | grep '^Average'
+
+## cognitive: Check cognitive complexity (threshold: 15)
+cognitive:
+	@which gocognit >/dev/null 2>&1 || go install github.com/uudashr/gocognit/cmd/gocognit@latest
 	@output=$$(gocognit -over 15 .); \
 	if [ -n "$$output" ]; then \
 		echo "Cognitive complexity over 15:"; \
 		echo "$$output"; \
 		exit 1; \
 	fi
-	@gocyclo -avg . | grep '^Average'
 
 ## test: Run tests
 test:
@@ -126,7 +129,7 @@ coverage:
 	@rm -f coverage.out
 
 ## check: Run all quality gates (the "is this ready to push?" command)
-check: fmt vet shadow lint vuln gosec gitleaks complexity test
+check: fmt vet shadow lint vuln gosec gitleaks cyclomatic cognitive test
 
 ## clean: Remove build artifacts
 clean:
