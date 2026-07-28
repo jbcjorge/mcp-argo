@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/jbcjorge/errors-library v0.1.1
-	github.com/mark3labs/mcp-go v0.56.0
+	github.com/mark3labs/mcp-go v0.57.0
 )
 
 require (
