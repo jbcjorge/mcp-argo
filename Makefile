@@ -1,4 +1,4 @@
-.PHONY: build install clean test lint vet vuln check fmt coverage release cyclomatic cognitive tools shadow gosec gitleaks update-deps
+.PHONY: build install clean test lint vet vuln check fmt coverage release dist cyclomatic cognitive tools shadow gosec gitleaks update-deps
 
 BINARY    = mcp-argo
 MODULE    = github.com/jbcjorge/mcp-argo
@@ -144,8 +144,8 @@ clean:
 	rm -f $(BINARY) coverage.out
 	rm -rf $(REPORTS_DIR) dist/
 
-## release: Cross-compile for distribution
-release: clean
+## dist: Cross-compile binaries for distribution into dist/
+dist: clean
 	@mkdir -p dist
 	GOOS=darwin  GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o dist/$(BINARY)_darwin_arm64 .
 	GOOS=darwin  GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/$(BINARY)_darwin_amd64 .
@@ -153,3 +153,17 @@ release: clean
 	GOOS=linux   GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o dist/$(BINARY)_linux_amd64 .
 	@echo "Binaries in dist/"
 	@ls -lh dist/
+
+## release: Tag an annotated version and push it (usage: make release VERSION=v1.2.3 [MESSAGE="notes"])
+release:
+	@if ! echo "$(VERSION)" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$$'; then \
+		echo "ERROR: VERSION must be an explicit semver tag (e.g., v1.2.3)."; \
+		echo "Usage: make release VERSION=v1.2.3 [MESSAGE=\"notes\"]"; exit 1; \
+	fi
+	@if git rev-parse "$(VERSION)" >/dev/null 2>&1; then \
+		echo "ERROR: tag $(VERSION) already exists"; exit 1; \
+	fi
+	@echo "Tagging $(VERSION)..."
+	git tag -a "$(VERSION)" -m "$(if $(MESSAGE),$(MESSAGE),Release $(VERSION))"
+	git push origin "$(VERSION)"
+	@echo "Released $(VERSION)"
