@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial release with 17 ArgoCD tools (11 read-only + 6 write)
+- Initial release with 18 ArgoCD tools (12 read-only + 6 write)
 - Three transport modes: stdio, SSE, streamable HTTP
 - Stateless HTTP mode for Kubernetes deployments without sticky sessions
 - Multi-instance token registry support (ARGOCD_TOKEN_REGISTRY_PATH)
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `argocd_list_applications` - list/search with pagination
 - `argocd_list_clusters` - list registered clusters
 - `argocd_get_application` - full application details
+- `argocd_get_appproject` - AppProject (project) details: sources, destinations, whitelists, RBAC roles
 - `argocd_get_application_resource_tree` - resource hierarchy
 - `argocd_get_application_managed_resources` - managed resources with filters
 - `argocd_get_application_workload_logs` - pod/workload logs

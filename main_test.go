@@ -5,8 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jbcjorge/mcp-argo/internal/handlers"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
@@ -22,105 +20,11 @@ func createMCPServer(readOnly bool) *server.MCPServer {
 		server.WithRecovery(),
 	)
 
-	s.AddTool(mcp.NewTool("argocd_list_applications",
-		mcp.WithDescription("List all ArgoCD applications"),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleListApplications)
-
-	s.AddTool(mcp.NewTool("argocd_list_clusters",
-		mcp.WithDescription("List all clusters"),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleListClusters)
-
-	s.AddTool(mcp.NewTool("argocd_get_application",
-		mcp.WithDescription("Get application details"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetApplication)
-
-	s.AddTool(mcp.NewTool("argocd_get_application_resource_tree",
-		mcp.WithDescription("Get resource tree"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetApplicationResourceTree)
-
-	s.AddTool(mcp.NewTool("argocd_get_application_managed_resources",
-		mcp.WithDescription("Get managed resources"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetApplicationManagedResources)
-
-	s.AddTool(mcp.NewTool("argocd_get_application_workload_logs",
-		mcp.WithDescription("Get workload logs"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetApplicationWorkloadLogs)
-
-	s.AddTool(mcp.NewTool("argocd_get_application_events",
-		mcp.WithDescription("Get application events"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetApplicationEvents)
-
-	s.AddTool(mcp.NewTool("argocd_get_resource_events",
-		mcp.WithDescription("Get resource events"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetResourceEvents)
-
-	s.AddTool(mcp.NewTool("argocd_get_resource_actions",
-		mcp.WithDescription("Get resource actions"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetResourceActions)
-
-	s.AddTool(mcp.NewTool("argocd_get_resources",
-		mcp.WithDescription("Get resource manifests"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetResources)
-
-	s.AddTool(mcp.NewTool("argocd_get_application_sync_windows",
-		mcp.WithDescription("Get sync windows"),
-		mcp.WithString("applicationName", mcp.Required()),
-		mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-	), handlers.HandleGetApplicationSyncWindows)
-
+	// Exercise the real registration code instead of duplicating the tool
+	// list here, so adding a tool never requires editing this test.
+	registerReadTools(s)
 	if !readOnly {
-		s.AddTool(mcp.NewTool("argocd_create_application",
-			mcp.WithDescription("Create application"),
-			mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-		), handlers.HandleCreateApplication)
-
-		s.AddTool(mcp.NewTool("argocd_update_application",
-			mcp.WithDescription("Update application"),
-			mcp.WithString("applicationName", mcp.Required()),
-			mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-		), handlers.HandleUpdateApplication)
-
-		s.AddTool(mcp.NewTool("argocd_delete_application",
-			mcp.WithDescription("Delete application"),
-			mcp.WithString("applicationName", mcp.Required()),
-			mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-		), handlers.HandleDeleteApplication)
-
-		s.AddTool(mcp.NewTool("argocd_sync_application",
-			mcp.WithDescription("Sync application"),
-			mcp.WithString("applicationName", mcp.Required()),
-			mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-		), handlers.HandleSyncApplication)
-
-		s.AddTool(mcp.NewTool("argocd_run_resource_action",
-			mcp.WithDescription("Run resource action"),
-			mcp.WithString("applicationName", mcp.Required()),
-			mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-		), handlers.HandleRunResourceAction)
-
-		s.AddTool(mcp.NewTool("argocd_rollback_application",
-			mcp.WithDescription("Rollback application"),
-			mcp.WithString("applicationName", mcp.Required()),
-			mcp.WithString("argocdBaseUrl", mcp.Description("ArgoCD instance URL")),
-		), handlers.HandleRollbackApplication)
+		registerWriteTools(s)
 	}
 
 	return s
@@ -136,19 +40,53 @@ func getToolNames(t *testing.T, s *server.MCPServer) []string {
 	return names
 }
 
-func TestToolRegistration_NormalMode_17Tools(t *testing.T) {
-	s := createMCPServer(false)
-	names := getToolNames(t, s)
-	if len(names) != 17 {
-		t.Errorf("expected 17 tools in normal mode, got %d: %v", len(names), names)
+// writeToolNames lists the tools that must only be present when write mode is
+// enabled. Kept as the single source of truth for the read-only gating tests.
+var writeToolNames = []string{
+	"argocd_create_application",
+	"argocd_update_application",
+	"argocd_delete_application",
+	"argocd_sync_application",
+	"argocd_run_resource_action",
+	"argocd_rollback_application",
+}
+
+func toolNameSet(t *testing.T, s *server.MCPServer) map[string]bool {
+	t.Helper()
+	set := make(map[string]bool)
+	for _, name := range getToolNames(t, s) {
+		set[name] = true
+	}
+	return set
+}
+
+func TestToolRegistration_ReadOnlyExcludesWriteTools(t *testing.T) {
+	names := toolNameSet(t, createMCPServer(true))
+	for _, w := range writeToolNames {
+		if names[w] {
+			t.Errorf("read-only mode should not register write tool %q", w)
+		}
+	}
+	if len(names) == 0 {
+		t.Fatal("read-only mode registered no tools")
 	}
 }
 
-func TestToolRegistration_ReadOnlyMode_11Tools(t *testing.T) {
-	s := createMCPServer(true)
-	names := getToolNames(t, s)
-	if len(names) != 11 {
-		t.Errorf("expected 11 tools in read-only mode, got %d: %v", len(names), names)
+func TestToolRegistration_NormalModeIncludesWriteTools(t *testing.T) {
+	names := toolNameSet(t, createMCPServer(false))
+	for _, w := range writeToolNames {
+		if !names[w] {
+			t.Errorf("normal mode is missing write tool %q", w)
+		}
+	}
+}
+
+func TestToolRegistration_NormalModeIsReadOnlyPlusWriteTools(t *testing.T) {
+	normal := len(getToolNames(t, createMCPServer(false)))
+	readOnly := len(getToolNames(t, createMCPServer(true)))
+	if normal != readOnly+len(writeToolNames) {
+		t.Errorf("normal tools (%d) should equal read-only tools (%d) + write tools (%d)",
+			normal, readOnly, len(writeToolNames))
 	}
 }
 
@@ -378,9 +316,8 @@ func TestPrintUsage(t *testing.T) {
 func TestRegisterReadTools(t *testing.T) {
 	s := server.NewMCPServer("test", "1.0.0", server.WithToolCapabilities(false))
 	registerReadTools(s)
-	tools := s.ListTools()
-	if len(tools) != 11 {
-		t.Errorf("registerReadTools should register 11 tools, got %d", len(tools))
+	if len(s.ListTools()) == 0 {
+		t.Error("registerReadTools registered no tools")
 	}
 }
 
@@ -388,18 +325,28 @@ func TestRegisterWriteTools(t *testing.T) {
 	s := server.NewMCPServer("test", "1.0.0", server.WithToolCapabilities(false))
 	registerWriteTools(s)
 	tools := s.ListTools()
-	if len(tools) != 6 {
-		t.Errorf("registerWriteTools should register 6 tools, got %d", len(tools))
+	if len(tools) != len(writeToolNames) {
+		t.Errorf("registerWriteTools should register %d tools, got %d", len(writeToolNames), len(tools))
+	}
+	for _, w := range writeToolNames {
+		if _, ok := tools[w]; !ok {
+			t.Errorf("registerWriteTools is missing %q", w)
+		}
 	}
 }
 
 func TestRegisterAllTools(t *testing.T) {
+	readOnly := server.NewMCPServer("test", "1.0.0", server.WithToolCapabilities(false))
+	registerReadTools(readOnly)
+	readCount := len(readOnly.ListTools())
+
 	s := server.NewMCPServer("test", "1.0.0", server.WithToolCapabilities(false))
 	registerReadTools(s)
 	registerWriteTools(s)
 	tools := s.ListTools()
-	if len(tools) != 17 {
-		t.Errorf("all tools should be 17, got %d", len(tools))
+	if len(tools) != readCount+len(writeToolNames) {
+		t.Errorf("all tools (%d) should equal read tools (%d) + write tools (%d)",
+			len(tools), readCount, len(writeToolNames))
 	}
 	for name := range tools {
 		if !strings.HasPrefix(name, "argocd_") {

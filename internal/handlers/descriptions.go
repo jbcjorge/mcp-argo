@@ -12,6 +12,7 @@ const (
 	DescResourceName         = "Name of the resource"
 	DescResourceVersion      = "API version of the resource"
 	DescResourceGroup        = "API group of the resource"
+	DescProjectName          = "Name of the ArgoCD AppProject (project) to fetch"
 )
 
 // apiApplicationsPath is the common API path prefix for ArgoCD application endpoints.

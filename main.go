@@ -176,6 +176,12 @@ func registerReadTools(s *server.MCPServer) {
 		mcp.WithString("argocdBaseUrl", mcp.Description(handlers.DescArgocdBaseURL)),
 	), handlers.HandleGetApplication)
 
+	s.AddTool(mcp.NewTool("argocd_get_appproject",
+		mcp.WithDescription("Get detailed information about a specific ArgoCD AppProject (project), including allowed sources, destinations, cluster/repository whitelists, and RBAC roles"),
+		mcp.WithString("projectName", mcp.Required(), mcp.Description(handlers.DescProjectName)),
+		mcp.WithString("argocdBaseUrl", mcp.Description(handlers.DescArgocdBaseURL)),
+	), handlers.HandleGetAppProject)
+
 	s.AddTool(mcp.NewTool("argocd_get_application_resource_tree",
 		mcp.WithDescription("Get the resource tree of an ArgoCD application showing all managed resources and their relationships"),
 		mcp.WithString("applicationName", mcp.Required(), mcp.Description(handlers.DescApplicationName)),

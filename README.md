@@ -6,7 +6,7 @@ Single binary, no runtime dependencies, ~18 MB RSS at runtime.
 
 ## Features
 
-- **17 ArgoCD tools** (11 read-only + 6 write)
+- **18 ArgoCD tools** (12 read-only + 6 write)
 - **Three transport modes**: stdio, SSE, streamable HTTP
 - **Multi-instance support**: token registry for targeting multiple ArgoCD clusters
 - **Read-only mode**: disable write operations via environment variable
@@ -143,6 +143,7 @@ The default token is **never** sent to a non-default URL (prevents token exfiltr
 | `argocd_list_applications` | List applications with optional search, limit, offset |
 | `argocd_list_clusters` | List registered clusters |
 | `argocd_get_application` | Get detailed application info |
+| `argocd_get_appproject` | Get AppProject (project) details: sources, destinations, whitelists, RBAC roles |
 | `argocd_get_application_resource_tree` | Get resource tree (pods, deployments, etc.) |
 | `argocd_get_application_managed_resources` | Get managed resources with filters |
 | `argocd_get_application_workload_logs` | Get workload logs (pods, deployments) |
