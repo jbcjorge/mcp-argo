@@ -1,4 +1,4 @@
-.PHONY: build install clean test lint vet vuln check fmt coverage release cyclomatic cognitive tools shadow gosec gitleaks
+.PHONY: build install clean test lint vet vuln check fmt coverage release cyclomatic cognitive tools shadow gosec gitleaks update-deps
 
 BINARY    = mcp-argo
 MODULE    = github.com/jbcjorge/mcp-argo
@@ -26,6 +26,14 @@ tools:
 	go install github.com/securego/gosec/v2/cmd/gosec@latest
 	go install gotest.tools/gotestsum@latest
 	go install github.com/boumenot/gocover-cobertura@latest
+
+## update-deps: Update direct dependencies to latest, tidy, and verify
+update-deps:
+	go list -m -f '{{if not .Indirect}}{{.Path}}{{end}}' all | tail -n +2 | xargs -I{} go get {}@latest
+	go get go@latest
+	go mod tidy
+	go build ./...
+	go test -count=1 ./...
 
 ## build: Compile binary
 build:

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/client"
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -30,7 +31,7 @@ func HandleListApplications(ctx context.Context, request mcp.CallToolRequest) (*
 
 	var resp map[string]interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	items, _ := resp["items"].([]interface{})
@@ -72,7 +73,7 @@ func HandleGetApplication(ctx context.Context, request mcp.CallToolRequest) (*mc
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -98,7 +99,7 @@ func HandleCreateApplication(ctx context.Context, request mcp.CallToolRequest) (
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -129,7 +130,7 @@ func HandleUpdateApplication(ctx context.Context, request mcp.CallToolRequest) (
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -165,7 +166,7 @@ func HandleDeleteApplication(ctx context.Context, request mcp.CallToolRequest) (
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -218,7 +219,7 @@ func HandleSyncApplication(ctx context.Context, request mcp.CallToolRequest) (*m
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -258,7 +259,7 @@ func HandleRollbackApplication(ctx context.Context, request mcp.CallToolRequest)
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)

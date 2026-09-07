@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/client"
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -33,7 +34,7 @@ func HandleGetApplicationResourceTree(ctx context.Context, request mcp.CallToolR
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -62,7 +63,7 @@ func HandleGetApplicationManagedResources(ctx context.Context, request mcp.CallT
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -133,7 +134,7 @@ func HandleGetResourceActions(ctx context.Context, request mcp.CallToolRequest) 
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -177,7 +178,7 @@ func HandleGetResourceEvents(ctx context.Context, request mcp.CallToolRequest) (
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)

@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/url"
 
+	errors "github.com/jbcjorge/errors-library"
 	"github.com/jbcjorge/mcp-argo/internal/client"
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -32,7 +32,7 @@ func HandleGetApplicationEvents(ctx context.Context, request mcp.CallToolRequest
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
@@ -60,7 +60,7 @@ func HandleGetApplicationSyncWindows(ctx context.Context, request mcp.CallToolRe
 
 	var resp interface{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return ErrResult(fmt.Errorf("%w: %w", client.ErrParseResponse, err))
+		return ErrResult(client.ErrParseResponse.Parse(errors.WithError(err)))
 	}
 
 	return JsonResult(resp)
