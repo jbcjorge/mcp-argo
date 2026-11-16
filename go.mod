@@ -1,9 +1,9 @@
 module github.com/jbcjorge/mcp-argo
 
-go 1.27.1
+go 1.27.3
 
 require (
-	github.com/jbcjorge/errors-library v0.1.1
+	github.com/jbcjorge/errors-library v0.2.0
 	github.com/mark3labs/mcp-go v1.0.0
 )
 
